@@ -423,6 +423,47 @@
             pointer-events: none;
         }
 
+        /* ===== SCROLL PROGRESS BAR ===== */
+        #progress-bar {
+            position: fixed;
+            top: 0; left: 0;
+            height: 2px;
+            width: 0%;
+            background: linear-gradient(90deg, var(--green), var(--blue));
+            z-index: 200;
+            transition: width 0.1s linear;
+            box-shadow: 0 0 8px var(--green);
+        }
+
+        /* ===== BACK TO TOP ===== */
+        #back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 100;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            color: var(--green);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            padding: 0.5rem 0.9rem;
+            border-radius: 4px;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.25s, transform 0.25s, border-color 0.15s, background 0.15s;
+            pointer-events: none;
+        }
+        #back-to-top.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all;
+        }
+        #back-to-top:hover {
+            background: rgba(63, 185, 80, 0.08);
+            border-color: var(--green);
+        }
+
         /* ===== RESPONSIVE ===== */
         @media (max-width: 640px) {
             nav { padding: 0 1rem; }
@@ -436,7 +477,9 @@
 </head>
 <body>
 
+<div id="progress-bar"></div>
 <canvas id="matrix-canvas"></canvas>
+<button id="back-to-top">↑ top</button>
 
 <!-- NAV -->
 <nav>
@@ -465,7 +508,7 @@
                 <span class="p-sep">:</span>
                 <span class="p-path">~</span>
                 <span class="p-sep">$</span>
-                <span class="p-cmd">whoami<span class="cursor"></span></span>
+                <span class="p-cmd"><span id="typed-cmd"></span><span class="cursor"></span></span>
             </div>
         </div>
     </div>
@@ -745,6 +788,37 @@
     }, { threshold: 0.35 });
 
     sections.forEach(s => navObs.observe(s));
+
+    // Scroll progress bar
+    const progressBar = document.getElementById('progress-bar');
+    window.addEventListener('scroll', () => {
+        const scrollTop = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        progressBar.style.width = pct + '%';
+    });
+
+    // Back to top button
+    const backBtn = document.getElementById('back-to-top');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 400) backBtn.classList.add('visible');
+        else backBtn.classList.remove('visible');
+    });
+    backBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+    // Typing animation for whoami
+    (function() {
+        const el = document.getElementById('typed-cmd');
+        const text = 'whoami';
+        let i = 0;
+        function type() {
+            if (i < text.length) {
+                el.textContent += text[i++];
+                setTimeout(type, 120);
+            }
+        }
+        setTimeout(type, 600);
+    })();
 </script>
 
 </body>
