@@ -413,6 +413,16 @@
             animation: blink 1.1s step-end infinite;
         }
 
+        /* ===== MATRIX CANVAS ===== */
+        #matrix-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            opacity: 0.13;
+            pointer-events: none;
+        }
+
         /* ===== RESPONSIVE ===== */
         @media (max-width: 640px) {
             nav { padding: 0 1rem; }
@@ -425,6 +435,8 @@
     </style>
 </head>
 <body>
+
+<canvas id="matrix-canvas"></canvas>
 
 <!-- NAV -->
 <nav>
@@ -665,6 +677,41 @@
 </footer>
 
 <script>
+    // Matrix rain
+    (function() {
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+        const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789ABCDEF<>{}[]|/\\'.split('');
+        const fontSize = 13;
+        let cols, drops;
+
+        function init() {
+            canvas.width  = window.innerWidth;
+            canvas.height = window.innerHeight;
+            cols  = Math.floor(canvas.width / fontSize);
+            drops = Array(cols).fill(1);
+        }
+
+        function draw() {
+            ctx.fillStyle = 'rgba(8, 12, 16, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#3fb950';
+            ctx.font = fontSize + 'px JetBrains Mono, monospace';
+            for (let i = 0; i < drops.length; i++) {
+                const char = chars[Math.floor(Math.random() * chars.length)];
+                ctx.fillText(char, i * fontSize, drops[i] * fontSize);
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+
+        init();
+        window.addEventListener('resize', init);
+        setInterval(draw, 50);
+    })();
+
     // Scroll-triggered fade-in for inner sections
     const io = new IntersectionObserver((entries) => {
         entries.forEach(e => {
